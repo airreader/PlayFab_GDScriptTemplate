@@ -56,17 +56,17 @@ function getResultActions(apiCall, api) {
 
 function generateApiSummary(tabbing, apiElement, summaryParam, extraLines) {
     var lines = generateApiSummaryLines(apiElement, summaryParam, extraLines);
-    var tabbedLineComment = tabbing + "\"\"\"";
+    var tabbedLineComment = "###";
 
     var output;
     if (lines.length === 1) {
-        output = tabbing + lines.join("\n" + tabbing) + "\n" + tabbedLineComment;
+        output = tabbing + lines.join("\n#" + tabbing) + "\n" + tabbedLineComment;
     } else if (lines.length > 0) {
-        output = tabbing + lines.join("\n" + tabbing) + "\n" + tabbedLineComment;
+        output = tabbing + lines.join("\n#" + tabbing) + "\n" + tabbedLineComment;
     } else {
         output = "";
     }
-    return tabbedLineComment + "\n" + output;
+    return tabbedLineComment + "\n#" + output;
 }
 
 
@@ -128,7 +128,15 @@ function makeDataModel(apis, sourceDir, apiOutputDir) {
 function replaceReservedWordName(word) {
     if (word === "OS") {
         return "OperatingSystem";
-    } else {
+    } else if (word === "Container") {
+        return "PFContainer"
+    } else if (word === "Resource") {
+        return "PFResource"
+    } else if (word === "Time") {
+        return "PFTime"
+    } else if (word === "Image") {
+        return "PFImage"
+    }else {
         return word;
     }
 }

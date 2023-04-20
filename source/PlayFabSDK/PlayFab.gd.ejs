@@ -54,8 +54,8 @@ func status_ntoa(n):
             return "STATUS_BODY"
         HTTPClient.STATUS_CONNECTION_ERROR:
             return "STATUS_CONNECTION_ERROR"
-        HTTPClient.STATUS_SSL_HANDSHAKE_ERROR:
-            return "STATUS_SSL_HANDSHAKE_ERROR"
+        HTTPClient.STATUS_TLS_HANDSHAKE_ERROR:
+            return "STATUS_TLS_HANDSHAKE_ERROR"
         var unknown_status_code:
             return "STATUS_[UNKNOWN %d]" % (unknown_status_code)
 
@@ -91,5 +91,5 @@ func _ready():
     _http_cli = load("res://PlayFabSDK/PlayFabHttpClient.gd").new()
 
 
-func _process(delta):
-    _http_cli.update(delta)
+func _process(_delta):
+    _http_cli.update(_delta)

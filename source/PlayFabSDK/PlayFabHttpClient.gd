@@ -28,15 +28,15 @@ class CRequest:
     var list_epilogue_work = []
     var o_result = null
 
-    func _init(h_request: int):
-        self.h_request = h_request
+    func _init(h_request_arg: int):
+        self.h_request = h_request_arg
 
 
 class CResult:
     var response_code = 0
     var dict_header = {}
     var size = -1
-    var data = PoolByteArray()
+    var data = PackedByteArray()
     var update_count = 0
 
     func update(client: HTTPClient):
@@ -46,7 +46,7 @@ class CResult:
     
             if client.is_response_chunked() != true:
                 self.size = client.get_response_body_length()
-                self.data = PoolByteArray()
+                self.data = PackedByteArray()
 
         var chunk = client.read_response_body_chunk()
         if chunk.size() > 0:
@@ -59,26 +59,17 @@ class CResult:
 # ------------------------------------------------------------------------ pro
 func pro_chk_entity_token():
 
-    assert(
-        PlayFabSettings._internalSettings.EntityToken,
-        "Must call EntityToken before calling this method"
-    )
+    assert(PlayFabSettings._internalSettings.EntityToken,"Must call EntityToken before calling this method")
 
 
 func pro_chk_secret_key():
 
-    assert(
-        PlayFabSettings._internalSettings.DeveloperSecretKey,
-        "Must have DeveloperSecretKey set to call this method"
-    )
+    assert(PlayFabSettings._internalSettings.DeveloperSecretKey, "Must have DeveloperSecretKey set to call this method")
 
 
 func pro_chk_session_ticket():
 
-    assert(
-        PlayFabSettings._internalSettings.ClientSessionTicket,
-        "Must be logged in to call this method"
-    )
+    assert(PlayFabSettings._internalSettings.ClientSessionTicket,"Must be logged in to call this method")
 
 
 func pro_use_auth_authorization():
@@ -116,10 +107,7 @@ func pro_use_title_id(dict_request: Dictionary):
     else:
         dict_request[K] = PlayFabSettings.TitleId
 
-    assert(
-        K in dict_request,
-        "Must be have TitleId set to call this method"
-    )
+    assert(K in dict_request,"Must be have TitleId set to call this method")
 
         
 # ------------------------------------------------------------------------ epi
@@ -129,7 +117,7 @@ func epi_upd_attribute():
 
 func epi_upd_entity_token(json_result):
     var K = "EntityToken"
-    var playFabResult = json_result.result["data"]
+    var playFabResult = json_result["data"]
 
     if K in playFabResult:
         PlayFabSettings._internalSettings.EntityToken = playFabResult[K]
@@ -137,7 +125,7 @@ func epi_upd_entity_token(json_result):
 
 func epi_upd_session_ticket(json_result):
     var K = "SessionTicket"
-    var playFabResult = json_result.result["data"]
+    var playFabResult = json_result["data"]
 
     if K in playFabResult:
         PlayFabSettings._internalSettings.ClientSessionTicket = playFabResult[K]
@@ -145,7 +133,7 @@ func epi_upd_session_ticket(json_result):
 
 func epi_req_multi_step_client_login(json_result):
     var K = "SettingsForUser"
-    var playFabResult = json_result.result["data"]
+    var playFabResult = json_result["data"]
     var settingsForUser = playFabResult[K]
     var disabledAds = PlayFabSettings.DisableAdvertising
     var adIdType = PlayFabSettings.AdvertisingIdType
@@ -161,7 +149,7 @@ func epi_req_multi_step_client_login(json_result):
 
 
 func build_host() -> Array:
-    if not PlayFabSettings.TitleId:
+    if PlayFabSettings.TitleId == null:
         assert(false)
 
     var host: String = ""
@@ -250,11 +238,12 @@ func request_append(
 func dispatch(o_request: CRequest):
 
     var raw_text = o_request.o_result.data.get_string_from_utf8()
-    var parse_result = JSON.parse(raw_text)
-    
-    if parse_result.error == OK:
-        if parse_result.result.has("code") == true:
-            if parse_result.result["code"] == 200:
+    var json_object = JSON.new()
+    var parse_result = {}
+    if json_object.parse(raw_text) == OK:
+        parse_result = JSON.parse_string(raw_text)
+        if parse_result.has("code") == true:
+            if parse_result["code"] == 200:
                 for e_val in o_request.list_epilogue_work:
                     match e_val:
                         PlayFab.E_EPI.REQ_MULTI_STEP_CLIENT_LOGIN:
@@ -267,7 +256,7 @@ func dispatch(o_request: CRequest):
                             epi_upd_session_ticket(parse_result)
 
     if o_request.user_callback != null:
-        o_request.user_callback.call_func(
+        o_request.user_callback.call(
             o_request.h_request,
             o_request.o_result.response_code,
             o_request.o_result.dict_header,
@@ -302,7 +291,7 @@ func request_cancel(h_request):
     return list_remove_target.size() > 0
 
 
-func update(delta):
+func update(_delta):
     if poll() == OK:
         pass
     status_curr = get_status()
@@ -335,7 +324,7 @@ func update(delta):
                     HTTPClient.METHOD_POST,
                     _current_request.url,
                     _current_request.list_header,
-                    JSON.print(_current_request.dict_request)
+                    JSON.stringify(_current_request.dict_request)
                 )
                 _current_request.o_result = CResult.new()
 

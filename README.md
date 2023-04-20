@@ -12,7 +12,7 @@ mkdir PlayFab_GDScriptSdk
 # 2)
 git clone https://github.com/PlayFab/SDKGenerator
 cd SDKGenerator/privateTemplates
-git clone https://github.com/MizunagiKB/PlayFab_GDScriptTemplate gdscriptsdk
+git clone https://github.com/airreader/PlayFab_Godot4_GDScriptTemplate.git gdscriptsdk
 cd ..
 
 # 3) Generate PlayFabSDK #1

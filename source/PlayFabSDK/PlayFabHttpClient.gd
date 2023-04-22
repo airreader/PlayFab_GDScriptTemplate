@@ -308,8 +308,7 @@ func update(_delta):
             if connecting == false:
                 var err = connect_to_host(
                     _current_request.host,
-                    _current_request.port,
-                    _current_request.is_ssl
+                    _current_request.port
                 )
                 if err == OK:
                     connecting = true
